@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API & Calculator</title>
+</head>
+<body>
+    <h1>Random Quote & Calculator</h1>
+    <p>Retrieve motivational quotes or perform basic calculations.</p>
+
+    <button id="getQuote">Fetch Quote</button>
+    <p id="quoteDisplay"></p>
+
+    <h2>Calculator</h2>
+    <form id="calcForm">
+        <label>First Number: <input type="number" id="firstNum" required></label>
+        <label>Second Number: <input type="number" id="secondNum" required></label>
+        <br><br>
+        <button type="button" onclick="compute('add')">+</button>
+        <button type="button" onclick="compute('subtract')">-</button>
+        <button type="button" onclick="compute('multiply')">×</button>
+        <button type="button" onclick="compute('divide')">÷</button>
+    </form>
+    <h3>Result:</h3>
+    <p id="calcResult">---</p>
+
+    <script>
+        document.getElementById('getQuote').addEventListener('click', () => {
+            fetch('http://localhost:3000/quote')
+                .then(res => res.json())
+                .then(data => document.getElementById('quoteDisplay').innerText = data.quote);
+        });
+
+        function compute(operation) {
+            const firstNum = parseFloat(document.getElementById('firstNum').value);
+            const secondNum = parseFloat(document.getElementById('secondNum').value);
+            if (isNaN(firstNum) || isNaN(secondNum)) {
+                alert("Enter valid numbers");
+                return;
+            }
+
+            fetch(`http://localhost:3000/${operation}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ num1: firstNum, num2: secondNum })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('calcResult').innerText = data.error ? `Error: ${data.error}` : `Result: ${data.result}`;
+            });
+        }
+    </script>
+</body>
+</html>
