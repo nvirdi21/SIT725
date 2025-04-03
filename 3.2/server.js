@@ -36,19 +36,6 @@ app.get('/cards', async (req, res) => {
     }
 });
 
-app.post('/cards', async (req, res) => {
-    const { name, image, description } = req.body;
-    
-    const newCard = new Card({ name, image, description });
-
-    try {
-        await newCard.save();
-        res.status(201).json(newCard);
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-});
-
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
