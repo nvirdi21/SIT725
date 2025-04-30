@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API, Calculator & Socket</title>
+</head>
+<body>
+    <h1>Quote & Calculator App with Socket</h1>
+    <p>Retrieve motivational quotes, perform calculations, and receive random numbers via sockets.</p>
+
+    <!-- Quote Section -->
+    <button id="getQuote">Fetch Quote</button>
+    <p id="quoteDisplay"></p>
+
+    <!-- Calculator Section -->
+    <h2>Calculator</h2>
+    <form id="calcForm">
+        <label>First Number: <input type="number" id="firstNum" required></label>
+        <label>Second Number: <input type="number" id="secondNum" required></label>
+        <br><br>
+        <button type="button" onclick="compute('add')">+</button>
+        <button type="button" onclick="compute('subtract')">-</button>
+        <button type="button" onclick="compute('multiply')">×</button>
+        <button type="button" onclick="compute('divide')">÷</button>
+    </form>
+    <h3>Result:</h3>
+    <p id="calcResult">---</p>
+
+    <!-- Socket Output -->
+    <h2>Random Number from Server (Socket):</h2>
+    <p id="randomNumber">Waiting for server...</p>
+
+    <!-- Load Socket.io before scripts -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Quote logic
+        document.getElementById('getQuote').addEventListener('click', () => {
+            fetch('/quote')
+                .then(res => res.json())
+                .then(data => document.getElementById('quoteDisplay').innerText = data.quote);
+        });
+
+        // Calculator logic
+        function compute(operation) {
+            const firstNum = parseFloat(document.getElementById('firstNum').value);
+            const secondNum = parseFloat(document.getElementById('secondNum').value);
+            if (isNaN(firstNum) || isNaN(secondNum)) {
+                alert("Enter valid numbers");
+                return;
+            }
+
+            fetch(`/${operation}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ num1: firstNum, num2: secondNum })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('calcResult').innerText = data.error ? `Error: ${data.error}` : `Result: ${data.result}`;
+            });
+        }
+
+        // Socket connection
+        const socket = io();
+
+        socket.on('number', (data) => {
+            document.getElementById('randomNumber').innerText = `Random Number: ${data}`;
+        });
+    </script>
+</body>
+</html>
